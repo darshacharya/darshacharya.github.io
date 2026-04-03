@@ -13,6 +13,8 @@ document.addEventListener("DOMContentLoaded", () => {
   initScrollAnimations();
   initActiveNav();
   initClock();
+  initParticles();
+  initCursorGlow();
 });
 
 /* ═══════════════════════════════════════════════
@@ -53,11 +55,6 @@ function renderAbout() {
   container.innerHTML = `
     <div class="about-text fade-up">
       <p>${d.description}</p>
-      <p style="margin-top:20px">
-        Currently at <span class="accent-text">${exp.company}</span> as
-        <strong>${exp.role}</strong>, working on cutting-edge AI tooling
-        and developer infrastructure.
-      </p>
       <p style="margin-top:20px; color: var(--text-muted)">
         I build things, make them work, make them feel good. That's the gig.
       </p>
@@ -331,6 +328,45 @@ function initScrollAnimations() {
   );
 
   document.querySelectorAll(".fade-up,.fade-left,.fade-right,.scale-in").forEach((el) => observer.observe(el));
+}
+
+/* ═══════════════════════════════════════════════
+   Cursor Glow
+   ═══════════════════════════════════════════════ */
+
+function initCursorGlow() {
+  const dot = document.getElementById("cursor-dot");
+  const glow = document.getElementById("cursor-glow");
+  if (!dot || !glow || window.innerWidth < 768) return;
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+  document.addEventListener("mousemove", (e) => {
+    dot.style.left = e.clientX + "px";
+    dot.style.top = e.clientY + "px";
+    glow.style.left = e.clientX + "px";
+    glow.style.top = e.clientY + "px";
+    if (!dot.classList.contains("active")) dot.classList.add("active");
+    if (!glow.classList.contains("active")) glow.classList.add("active");
+
+    const target = e.target.closest("a, button, input, .btn, .project-item, .stat-card, .cta-link, .nav-toggle");
+    dot.classList.toggle("hovering", !!target);
+  });
+
+  document.addEventListener("mouseleave", () => {
+    dot.classList.remove("active");
+    glow.classList.remove("active");
+  });
+}
+
+/* ═══════════════════════════════════════════════
+   Particles Background
+   ═══════════════════════════════════════════════ */
+
+function initParticles() {
+  const canvas = document.getElementById("particle-canvas");
+  if (canvas && typeof TextParticles !== "undefined") {
+    TextParticles.init(canvas);
+  }
 }
 
 /* ═══════════════════════════════════════════════

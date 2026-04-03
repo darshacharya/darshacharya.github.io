@@ -4,9 +4,10 @@ const DATA = {
     role: "Software Developer (AI + Data + IoT)",
     title: "Master of Technology",
     description:
-      "M.Tech student at RV College of Engineering with hands-on experience in AI/ML, " +
-      "data analytics, and IoT systems. Passionate about building intelligent, data-driven " +
-      "solutions — from multimodal health assistants to real-time telemetry pipelines.",
+      "M.Tech student at RV College of Engineering, currently at Red Hat contributing to the " +
+      "Dataverse platform, building RAG-powered AI assistants, data pipelines, and analytics tooling. " +
+      "Hands-on experience in AI/ML, data analytics, and IoT systems. Passionate about building " +
+      "intelligent, data-driven solutions — from multimodal health assistants to real-time telemetry pipelines.",
   },
 
   experience: [

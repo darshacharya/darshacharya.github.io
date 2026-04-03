@@ -42,7 +42,7 @@
    Reset
    ═══════════════════════════════════════════════ */
 
-*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; cursor: none; }
 
 html {
   scroll-behavior: smooth;
@@ -57,6 +57,53 @@ body {
   line-height: 1.7;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
+}
+
+#cursor-dot {
+  position: fixed;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  transition: opacity 0.3s, width 0.25s var(--ease), height 0.25s var(--ease), background 0.25s;
+  will-change: left, top;
+  box-shadow: 0 0 8px rgba(57,255,20,0.6);
+}
+#cursor-dot.active { opacity: 1; }
+#cursor-dot.hovering {
+  width: 40px;
+  height: 40px;
+  background: transparent;
+  border: 1.5px solid var(--accent);
+  box-shadow: 0 0 16px rgba(57,255,20,0.3);
+}
+
+#cursor-glow {
+  position: fixed;
+  width: 600px;
+  height: 600px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9998;
+  background: radial-gradient(circle, rgba(57,255,20,0.07) 0%, rgba(57,255,20,0.02) 35%, transparent 70%);
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  transition: opacity 0.4s var(--ease);
+  will-change: left, top;
+}
+#cursor-glow.active { opacity: 1; }
+
+@media (max-width: 768px) {
+  *, *::before, *::after { cursor: auto; }
+  #cursor-dot, #cursor-glow { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { cursor: auto; }
+  #cursor-dot, #cursor-glow { display: none; }
 }
 
 a { color: var(--accent); text-decoration: none; transition: color 0.3s var(--ease); }
@@ -163,9 +210,21 @@ img { max-width: 100%; display: block; }
   justify-content: center;
   position: relative;
   padding: 80px 32px 60px;
+  overflow: hidden;
+}
+
+#particle-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
 }
 
 .hero-content {
+  position: relative;
+  z-index: 1;
   max-width: var(--max-w);
   width: 100%;
 }
@@ -193,13 +252,14 @@ img { max-width: 100%; display: block; }
 }
 
 .hero-desc {
-  font-size: 1.15rem;
+  font-size: 1.1rem;
   color: var(--text);
-  max-width: 520px;
+  max-width: 640px;
   line-height: 1.8;
   margin-bottom: 48px;
   opacity: 0;
   animation: fadeUp 0.8s var(--ease) 0.6s forwards;
+  text-wrap: pretty;
 }
 
 .hero-actions {
