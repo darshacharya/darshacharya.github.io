@@ -15,6 +15,10 @@ document.addEventListener("DOMContentLoaded", () => {
   initClock();
   initParticles();
   initCursorGlow();
+  initCardGlow();
+  initStickyHeaders();
+  initCounters();
+  initMagneticButtons();
 });
 
 /* ═══════════════════════════════════════════════
@@ -25,7 +29,7 @@ function renderHero() {
   const d = DATA.about;
   document.getElementById("hero-tag").textContent = d.role;
   document.getElementById("hero-name").textContent = d.name;
-  document.getElementById("hero-desc").textContent = d.description;
+  document.getElementById("hero-desc").textContent = "I build AI systems, crunch data, and wire up IoT devices.";
 }
 
 /* ═══════════════════════════════════════════════
@@ -78,7 +82,7 @@ function renderAbout() {
       <div class="stat-card fade-right" style="--stagger:3">
         <div class="stat-icon">${Icons.award}</div>
         <div class="stat-label">CGPA</div>
-        <div class="stat-value">${DATA.education[0].cgpa}</div>
+        <div class="stat-value" data-count="${DATA.education[0].cgpa}" data-decimals="2">0</div>
       </div>
     </div>
   `;
@@ -289,6 +293,7 @@ function initNavbar() {
     });
   });
 
+  const progressBar = document.getElementById("scroll-progress");
   let lastScroll = 0;
   let ticking = false;
   window.addEventListener("scroll", () => {
@@ -298,6 +303,12 @@ function initNavbar() {
         navbar.classList.toggle("nav-scrolled", y > 80);
         navbar.classList.toggle("nav-hidden", y > lastScroll && y > 400);
         lastScroll = y;
+
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        if (progressBar && docHeight > 0) {
+          progressBar.style.transform = "scaleX(" + (y / docHeight) + ")";
+        }
+
         ticking = false;
       });
       ticking = true;
@@ -306,11 +317,48 @@ function initNavbar() {
 }
 
 /* ═══════════════════════════════════════════════
+   Text Scramble
+   ═══════════════════════════════════════════════ */
+
+function textScramble(el) {
+  const chars = "!<>-_\\/[]{}#$%^&*()=+01";
+  const original = el.textContent;
+  const length = original.length;
+  let frame = 0;
+  const totalFrames = 20;
+
+  function update() {
+    let output = "";
+    for (let i = 0; i < length; i++) {
+      if (original[i] === " ") {
+        output += " ";
+      } else if (frame >= totalFrames * (i / length) + 5) {
+        output += original[i];
+      } else if (frame >= totalFrames * (i / length)) {
+        output += chars[Math.floor(Math.random() * chars.length)];
+      } else {
+        output += chars[Math.floor(Math.random() * chars.length)];
+      }
+    }
+    el.textContent = output;
+    frame++;
+    if (frame < totalFrames + 10) {
+      requestAnimationFrame(update);
+    } else {
+      el.textContent = original;
+    }
+  }
+  requestAnimationFrame(update);
+}
+
+/* ═══════════════════════════════════════════════
    Scroll Animations
    ═══════════════════════════════════════════════ */
 
 function initScrollAnimations() {
-  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  if (reducedMotion) {
     document.querySelectorAll(".fade-up,.fade-left,.fade-right,.scale-in").forEach((el) => el.classList.add("visible"));
     return;
   }
@@ -320,6 +368,9 @@ function initScrollAnimations() {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
           entry.target.classList.add("visible");
+          if (entry.target.classList.contains("section-heading")) {
+            textScramble(entry.target);
+          }
           observer.unobserve(entry.target);
         }
       });
@@ -328,6 +379,89 @@ function initScrollAnimations() {
   );
 
   document.querySelectorAll(".fade-up,.fade-left,.fade-right,.scale-in").forEach((el) => observer.observe(el));
+}
+
+/* ═══════════════════════════════════════════════
+   Animated Counters
+   ═══════════════════════════════════════════════ */
+
+function initCounters() {
+  const counters = document.querySelectorAll("[data-count]");
+  if (!counters.length) return;
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        const el = entry.target;
+        observer.unobserve(el);
+
+        const target = parseFloat(el.dataset.count);
+        const decimals = parseInt(el.dataset.decimals || "0", 10);
+        const suffix = el.dataset.suffix || "";
+        const prefix = el.dataset.prefix || "";
+        const duration = 1200;
+        const start = performance.now();
+
+        function tick(now) {
+          const elapsed = now - start;
+          const progress = Math.min(elapsed / duration, 1);
+          const eased = 1 - Math.pow(1 - progress, 3);
+          const current = eased * target;
+          el.textContent = prefix + current.toFixed(decimals) + suffix;
+          if (progress < 1) requestAnimationFrame(tick);
+        }
+        requestAnimationFrame(tick);
+      });
+    },
+    { threshold: 0.5 }
+  );
+
+  counters.forEach((c) => observer.observe(c));
+}
+
+/* ═══════════════════════════════════════════════
+   Sticky Header Detection
+   ═══════════════════════════════════════════════ */
+
+function initStickyHeaders() {
+  const headers = document.querySelectorAll(".section-header");
+  if (!headers.length) return;
+
+  const sentinelMap = new WeakMap();
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        const header = sentinelMap.get(entry.target);
+        if (header) header.classList.toggle("pinned", !entry.isIntersecting);
+      });
+    },
+    { threshold: 1, rootMargin: "-1px 0px 0px 0px" }
+  );
+
+  headers.forEach((h) => {
+    const sentinel = document.createElement("div");
+    sentinel.style.cssText = "height:1px;width:100%;pointer-events:none;visibility:hidden;position:absolute;top:0;";
+    h.parentElement.insertBefore(sentinel, h);
+    sentinelMap.set(sentinel, h);
+    observer.observe(sentinel);
+  });
+}
+
+/* ═══════════════════════════════════════════════
+   Card Mouse Tracking
+   ═══════════════════════════════════════════════ */
+
+function initCardGlow() {
+  const cards = document.querySelectorAll(".exp-item, .project-item, .stat-card, .edu-card, .cta-link");
+  cards.forEach((card) => {
+    card.addEventListener("mousemove", (e) => {
+      const rect = card.getBoundingClientRect();
+      card.style.setProperty("--mouse-x", (e.clientX - rect.left) + "px");
+      card.style.setProperty("--mouse-y", (e.clientY - rect.top) + "px");
+    });
+  });
 }
 
 /* ═══════════════════════════════════════════════
@@ -355,6 +489,33 @@ function initCursorGlow() {
   document.addEventListener("mouseleave", () => {
     dot.classList.remove("active");
     glow.classList.remove("active");
+  });
+}
+
+/* ═══════════════════════════════════════════════
+   Magnetic Buttons
+   ═══════════════════════════════════════════════ */
+
+function initMagneticButtons() {
+  if (window.innerWidth < 768) return;
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+  const btns = document.querySelectorAll(".btn");
+  const strength = 0.3;
+
+  btns.forEach((btn) => {
+    btn.addEventListener("mousemove", (e) => {
+      const rect = btn.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      const dx = (e.clientX - cx) * strength;
+      const dy = (e.clientY - cy) * strength;
+      btn.style.transform = `translate(${dx}px, ${dy}px)`;
+    });
+
+    btn.addEventListener("mouseleave", () => {
+      btn.style.transform = "";
+    });
   });
 }
 

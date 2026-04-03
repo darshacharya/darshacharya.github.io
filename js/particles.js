@@ -32,16 +32,16 @@ const TextParticles = (() => {
   let active = false;
 
   const CONFIG = {
-    count: 120,
-    repelRadius: 140,
+    count: 160,
+    repelRadius: 150,
     repelStrength: 6,
     springBack: 0.025,
     friction: 0.9,
     minFontSize: 10,
     maxFontSize: 16,
-    minOpacity: 0.04,
-    maxOpacity: 0.14,
-    hoverOpacityBoost: 0.35,
+    minOpacity: 0.03,
+    maxOpacity: 0.12,
+    hoverOpacityBoost: 0.3,
     fontFamily: '"Fira Code", monospace',
     color: [57, 255, 20],
   };
@@ -90,9 +90,8 @@ const TextParticles = (() => {
 
   function resize() {
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    const rect = canvas.parentElement.getBoundingClientRect();
-    width = rect.width;
-    height = rect.height;
+    width = window.innerWidth;
+    height = window.innerHeight;
     canvas.width = width * dpr;
     canvas.height = height * dpr;
     canvas.style.width = width + "px";
@@ -114,9 +113,8 @@ const TextParticles = (() => {
   }
 
   function onMouse(e) {
-    const rect = canvas.getBoundingClientRect();
-    mouse.x = e.clientX - rect.left;
-    mouse.y = e.clientY - rect.top;
+    mouse.x = e.clientX;
+    mouse.y = e.clientY;
   }
 
   function loop() {
