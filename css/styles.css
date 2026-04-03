@@ -222,10 +222,9 @@ img { max-width: 100%; display: block; }
   display: flex;
   align-items: center;
   justify-content: center;
-  position: sticky;
-  top: 0;
-  z-index: 0;
+  position: relative;
   padding: 80px 32px 60px;
+  background: transparent;
 }
 
 #particle-canvas {
@@ -396,7 +395,7 @@ img { max-width: 100%; display: block; }
   border-bottom: 1px solid var(--border);
   padding: 18px 0;
   overflow: hidden;
-  background: rgba(17, 17, 17, 0.9);
+  background: rgba(17, 17, 17, 0.92);
   position: relative;
   z-index: 1;
 }
@@ -442,7 +441,10 @@ img { max-width: 100%; display: block; }
   padding: 120px 0;
   position: relative;
   z-index: 1;
-  background: var(--bg);
+  background:
+    radial-gradient(circle at 1px 1px, rgba(255,255,255,0.03) 1px, transparent 0),
+    rgba(10, 10, 10, 0.88);
+  background-size: 40px 40px, auto;
 }
 .section::before {
   content: "";
@@ -451,32 +453,41 @@ img { max-width: 100%; display: block; }
   left: 0;
   right: 0;
   height: 60px;
-  background: linear-gradient(to bottom, transparent, var(--bg));
+  background: linear-gradient(to bottom, transparent, rgba(10, 10, 10, 0.88));
   pointer-events: none;
   z-index: 1;
 }
-.section-alt { background: var(--bg-alt); }
-.section-alt::before {
-  background: linear-gradient(to bottom, transparent, var(--bg-alt));
+.section::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse 600px 400px at 0% 0%, rgba(57,255,20,0.04), transparent),
+    radial-gradient(ellipse 500px 350px at 100% 100%, rgba(57,255,20,0.03), transparent);
 }
+.section-alt {
+  background:
+    radial-gradient(circle at 1px 1px, rgba(255,255,255,0.03) 1px, transparent 0),
+    rgba(17, 17, 17, 0.9);
+  background-size: 40px 40px, auto;
+}
+.section-alt::before {
+  background: linear-gradient(to bottom, transparent, rgba(17, 17, 17, 0.9));
+}
+.section-alt::after {
+  background:
+    radial-gradient(ellipse 600px 400px at 100% 0%, rgba(57,255,20,0.04), transparent),
+    radial-gradient(ellipse 500px 350px at 0% 100%, rgba(57,255,20,0.03), transparent);
+}
+.section > .container { position: relative; z-index: 1; }
 
 .section-header {
-  position: sticky;
-  top: 0;
-  z-index: 2;
-  padding: 24px 0;
-  margin: -24px 0 24px;
-  background: rgba(10, 10, 10, 0.8);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1px solid transparent;
-  transition: border-color 0.3s;
-}
-.section-alt .section-header {
-  background: rgba(17, 17, 17, 0.8);
-}
-.section-header.pinned {
-  border-bottom-color: var(--border);
+  margin-bottom: 40px;
 }
 
 .section-label {
@@ -1136,7 +1147,10 @@ img { max-width: 100%; display: block; }
   border-top: 1px solid var(--border);
   position: relative;
   z-index: 1;
-  background: rgba(10, 10, 10, 0.92);
+  background:
+    radial-gradient(circle at 1px 1px, rgba(255,255,255,0.02) 1px, transparent 0),
+    rgba(10, 10, 10, 0.92);
+  background-size: 40px 40px, auto;
 }
 
 .footer-inner {
@@ -1238,8 +1252,6 @@ img { max-width: 100%; display: block; }
 
   .section { padding: 80px 0; }
   .section::before { display: none; }
-  .hero { position: relative; }
-  .section-header { position: relative; background: transparent; backdrop-filter: none; -webkit-backdrop-filter: none; border-bottom: none; }
   .container { padding: 0 20px; }
 
   .hero { padding: 100px 20px 60px; }

@@ -16,7 +16,6 @@ document.addEventListener("DOMContentLoaded", () => {
   initParticles();
   initCursorGlow();
   initCardGlow();
-  initStickyHeaders();
   initCounters();
   initMagneticButtons();
 });
@@ -317,48 +316,11 @@ function initNavbar() {
 }
 
 /* ═══════════════════════════════════════════════
-   Text Scramble
-   ═══════════════════════════════════════════════ */
-
-function textScramble(el) {
-  const chars = "!<>-_\\/[]{}#$%^&*()=+01";
-  const original = el.textContent;
-  const length = original.length;
-  let frame = 0;
-  const totalFrames = 20;
-
-  function update() {
-    let output = "";
-    for (let i = 0; i < length; i++) {
-      if (original[i] === " ") {
-        output += " ";
-      } else if (frame >= totalFrames * (i / length) + 5) {
-        output += original[i];
-      } else if (frame >= totalFrames * (i / length)) {
-        output += chars[Math.floor(Math.random() * chars.length)];
-      } else {
-        output += chars[Math.floor(Math.random() * chars.length)];
-      }
-    }
-    el.textContent = output;
-    frame++;
-    if (frame < totalFrames + 10) {
-      requestAnimationFrame(update);
-    } else {
-      el.textContent = original;
-    }
-  }
-  requestAnimationFrame(update);
-}
-
-/* ═══════════════════════════════════════════════
    Scroll Animations
    ═══════════════════════════════════════════════ */
 
 function initScrollAnimations() {
-  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-  if (reducedMotion) {
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
     document.querySelectorAll(".fade-up,.fade-left,.fade-right,.scale-in").forEach((el) => el.classList.add("visible"));
     return;
   }
@@ -368,9 +330,6 @@ function initScrollAnimations() {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
           entry.target.classList.add("visible");
-          if (entry.target.classList.contains("section-heading")) {
-            textScramble(entry.target);
-          }
           observer.unobserve(entry.target);
         }
       });
@@ -418,35 +377,6 @@ function initCounters() {
   );
 
   counters.forEach((c) => observer.observe(c));
-}
-
-/* ═══════════════════════════════════════════════
-   Sticky Header Detection
-   ═══════════════════════════════════════════════ */
-
-function initStickyHeaders() {
-  const headers = document.querySelectorAll(".section-header");
-  if (!headers.length) return;
-
-  const sentinelMap = new WeakMap();
-
-  const observer = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        const header = sentinelMap.get(entry.target);
-        if (header) header.classList.toggle("pinned", !entry.isIntersecting);
-      });
-    },
-    { threshold: 1, rootMargin: "-1px 0px 0px 0px" }
-  );
-
-  headers.forEach((h) => {
-    const sentinel = document.createElement("div");
-    sentinel.style.cssText = "height:1px;width:100%;pointer-events:none;visibility:hidden;position:absolute;top:0;";
-    h.parentElement.insertBefore(sentinel, h);
-    sentinelMap.set(sentinel, h);
-    observer.observe(sentinel);
-  });
 }
 
 /* ═══════════════════════════════════════════════
